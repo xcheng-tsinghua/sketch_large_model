@@ -42,7 +42,6 @@ def main(args):
     sketch_enc = SketchEncoder().cuda()
 
     '''定义优化器'''
-
     optimizer = torch.optim.AdamW(
         sketch_enc.parameters(), lr=0.003, betas=(0.9, 0.98),
         eps=1e-08, weight_decay=0.1
@@ -74,6 +73,7 @@ def main(args):
 
         scheduler.step()
         torch.save(sketch_enc.state_dict(), './weights/sketch_encoder.pth')
+        print('save sketch weights at: ./weights/sketch_encoder.pth')
 
 
 if __name__ == '__main__':

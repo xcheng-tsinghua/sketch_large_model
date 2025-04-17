@@ -13,7 +13,7 @@ import torch.amp as amp
 def parse_args():
     parser = argparse.ArgumentParser('training')
 
-    parser.add_argument('--bs', type=int, default=80, help='batch size in training')
+    parser.add_argument('--bs', type=int, default=128, help='batch size in training')
     parser.add_argument('--epoch', default=2000, type=int, help='number of epoch in training')
 
     parser.add_argument('--local', type=str, default='False', choices=['True', 'False'], help='local or sever?')

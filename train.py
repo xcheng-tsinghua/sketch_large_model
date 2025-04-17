@@ -7,7 +7,7 @@ from encoders.PointBERT_ULIP2 import create_pretrained_pointbert
 from encoders.sketch_encoder import SketchEncoder
 from data.ulip_dataset import UlipDataset
 from encoders.loss_func import ULIPWithImageLoss as SketchLoss
-import torch.amp as amp
+import torch.cuda.amp as amp
 
 
 def parse_args():
@@ -58,7 +58,7 @@ def main(args):
             text_data, pcd_data, skh_data, tensor_image = data[0].long().cuda(), data[1].float().cuda(), data[2].float().cuda(), data[3].float().cuda()
 
             optimizer.zero_grad()
-            with amp.autocast('cuda', enabled=True):
+            with amp.autocast(enabled=True):
 
                 text_embed = pre_txt_enc(text_data).detach()
                 pcd_embed = pre_pnt_enc(pcd_data).detach()

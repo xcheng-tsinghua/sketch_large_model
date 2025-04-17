@@ -1,0 +1,4 @@
+weights/
+.idea/
+data/__pycache__/
+encoders/__pycache__/

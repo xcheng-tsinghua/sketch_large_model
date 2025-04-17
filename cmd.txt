@@ -1,0 +1,37 @@
+
+cd ./my_data/networks/sketch_large_model/
+conda activate dp
+
+## 同步到云端
+# 查看当前状态
+git status
+
+# 将修改添加到暂存区
+git add .
+
+# 将更改信息暂存到本地
+git commit -m "change"
+
+# 推送到远程仓库
+git push origin main
+
+
+git status && git add . && git commit -m "change" && git push origin main
+
+
+## 同步到本地
+git pull origin main
+
+# 强制同步到本地
+git reset --hard
+git pull origin main
+
+
+
+
+## 查看 nohup 的进程输出
+tail -f nohup.out
+
+## 查看 nohup 的进程
+ps -ef | grep python
+

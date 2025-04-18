@@ -6,7 +6,8 @@ from encoders.TextEncoder_ULIP import create_pretrained_textencoder
 from encoders.PointBERT_ULIP2 import create_pretrained_pointbert
 from encoders.sketch_encoder import SketchEncoder
 from data.ulip_dataset import UlipDataset
-from encoders.loss_func import ULIPWithImageLoss as SketchLoss
+# from encoders.loss_func import ULIPWithImageLoss as SketchLoss
+from encoders.loss_func import MSELoss as SketchLoss
 import torch.amp as amp
 from colorama import Fore, Back, init
 
@@ -70,15 +71,23 @@ def main(args):
             text_data, pcd_data, skh_data, tensor_image = data[0].long().cuda(), data[1].float().cuda(), data[2].float().cuda(), data[3].float().cuda()
 
             optimizer.zero_grad()
-            with amp.autocast('cuda', enabled=True):
+            # with amp.autocast('cuda', enabled=True):
+            #
+            #     text_embed = pre_txt_enc(text_data).detach()
+            #     pcd_embed = pre_pnt_enc(pcd_data).detach()
+            #     image_embed = pre_img_enc(tensor_image).detach()
+            #     sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
+            #
+            #     loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
+            #     loss = loss_dict['loss']
 
-                text_embed = pre_txt_enc(text_data).detach()
-                pcd_embed = pre_pnt_enc(pcd_data).detach()
-                image_embed = pre_img_enc(tensor_image).detach()
-                sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
+            text_embed = pre_txt_enc(text_data).detach()
+            pcd_embed = pre_pnt_enc(pcd_data).detach()
+            image_embed = pre_img_enc(tensor_image).detach()
+            sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
 
-                loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
-                loss = loss_dict['loss']
+            loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
+            loss = loss_dict['loss']
 
             loss.backward()
             optimizer.step()

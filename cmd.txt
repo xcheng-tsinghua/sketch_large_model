@@ -37,6 +37,6 @@ ps -ef | grep python
 
 
 
-python train_gra_transf_inpt5_new_dropout_2layerMLP_2nn4nnjnn_early_stop.py --exp train_gra_transf_inpt5_new_dropout_2layerMLP_2nn4nnjnn_early_stop_001 --batch_size 192 --num_workers 12 --gpu 0
+
 
 

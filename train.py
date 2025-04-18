@@ -75,23 +75,23 @@ def main(args):
             text_data, pcd_data, skh_data, tensor_image = data[0].long().cuda(), data[1].float().cuda(), data[2].float().cuda(), data[3].float().cuda()
 
             optimizer.zero_grad()
-            # with amp.autocast('cuda', enabled=True):
-            #
-            #     text_embed = pre_txt_enc(text_data).detach()
-            #     pcd_embed = pre_pnt_enc(pcd_data).detach()
-            #     image_embed = pre_img_enc(tensor_image).detach()
-            #     sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
-            #
-            #     loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
-            #     loss = loss_dict['loss']
+            with amp.autocast('cuda', enabled=True):
 
-            text_embed = pre_txt_enc(text_data).detach().clone()
-            pcd_embed = pre_pnt_enc(pcd_data).detach().clone()
-            image_embed = pre_img_enc(tensor_image).detach().clone()
-            sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
+                text_embed = pre_txt_enc(text_data).detach()
+                pcd_embed = pre_pnt_enc(pcd_data).detach()
+                image_embed = pre_img_enc(tensor_image).detach()
+                sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
 
-            loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
-            loss = loss_dict['loss']
+                loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
+                loss = loss_dict['loss']
+
+            # text_embed = pre_txt_enc(text_data).detach().clone()
+            # pcd_embed = pre_pnt_enc(pcd_data).detach().clone()
+            # image_embed = pre_img_enc(tensor_image).detach().clone()
+            # sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
+            #
+            # loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
+            # loss = loss_dict['loss']
 
             loss.backward()
             optimizer.step()

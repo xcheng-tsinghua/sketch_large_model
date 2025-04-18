@@ -81,9 +81,9 @@ def main(args):
             #     loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)
             #     loss = loss_dict['loss']
 
-            text_embed = pre_txt_enc(text_data).detach()
-            pcd_embed = pre_pnt_enc(pcd_data).detach()
-            image_embed = pre_img_enc(tensor_image).detach()
+            text_embed = pre_txt_enc(text_data).detach().clone()
+            pcd_embed = pre_pnt_enc(pcd_data).detach().clone()
+            image_embed = pre_img_enc(tensor_image).detach().clone()
             sketch_embed, logit_scale = sketch_enc(skh_data)  # 需要训练
 
             loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, logit_scale)

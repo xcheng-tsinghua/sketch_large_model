@@ -8,6 +8,7 @@ from encoders.sketch_encoder import SketchEncoder
 from data.ulip_dataset import UlipDataset
 from encoders.loss_func import ULIPWithImageLoss as SketchLoss
 import torch.amp as amp
+from colorama import Fore, Back, init
 
 
 def parse_args():
@@ -15,6 +16,7 @@ def parse_args():
 
     parser.add_argument('--bs', type=int, default=100, help='batch size in training')
     parser.add_argument('--epoch', default=2000, type=int, help='number of epoch in training')
+    parser.add_argument('--is_load_weight', type=str, default='True', choices=['True', 'False'], help='is load pretrained weight')
 
     parser.add_argument('--local', type=str, default='False', choices=['True', 'False'], help='local or sever?')
     parser.add_argument('--root_sever', type=str, default=rf'/root/my_data/data_set/sketch_large_model_dataset', help='data root in sever')
@@ -40,6 +42,16 @@ def main(args):
     pre_pnt_enc = create_pretrained_pointbert().cuda()
 
     sketch_enc = SketchEncoder().cuda()
+
+    '''加载权重'''
+    if args.is_load_weight == 'True':
+        try:
+            sketch_enc.load_state_dict(torch.load('./weights/sketch_encoder.pth'))
+            print(Fore.GREEN + 'training from exist model: ./weights/sketch_encoder.pth')
+        except:
+            print(Fore.GREEN + 'no existing model, training from scratch')
+    else:
+        print(Fore.BLACK + Back.BLUE + 'does not load state dict, training from scratch')
 
     '''定义优化器'''
     optimizer = torch.optim.AdamW(
@@ -73,10 +85,11 @@ def main(args):
 
         scheduler.step()
         torch.save(sketch_enc.state_dict(), './weights/sketch_encoder.pth')
-        print('save sketch weights at: ./weights/sketch_encoder.pth')
+        print(Back.BLUE + f'{epoch} / {args.epoch}: save sketch weights at: ./weights/sketch_encoder.pth, loss: {loss.item()}')
 
 
 if __name__ == '__main__':
+    init(autoreset=True)
     main(parse_args())
 
 

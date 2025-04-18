@@ -1,4 +1,6 @@
 import argparse
+
+import numpy as np
 import torch
 from tqdm import tqdm
 from encoders.ImageEncoder_ULIP import create_pretrained_imageencoder
@@ -67,6 +69,8 @@ def main(args):
     for epoch in range(args.epoch):
         sketch_enc = sketch_enc.train()
 
+        loss_list = []
+
         for batch_id, data in tqdm(enumerate(train_dataloader, 0), total=len(train_dataloader)):
             text_data, pcd_data, skh_data, tensor_image = data[0].long().cuda(), data[1].float().cuda(), data[2].float().cuda(), data[3].float().cuda()
 
@@ -92,9 +96,11 @@ def main(args):
             loss.backward()
             optimizer.step()
 
+            loss_list.append(loss.item())
+
         scheduler.step()
         torch.save(sketch_enc.state_dict(), './weights/sketch_encoder.pth')
-        print(Back.BLUE + f'{epoch} / {args.epoch}: save sketch weights at: ./weights/sketch_encoder.pth, loss: {loss.item()}')
+        print(Back.BLUE + f'{epoch} / {args.epoch}: save sketch weights at: ./weights/sketch_encoder.pth, loss: {np.mean(loss_list)}')
 
 
 if __name__ == '__main__':

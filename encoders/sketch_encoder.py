@@ -44,10 +44,8 @@ class SketchDiscreteEmbedding(nn.Module):
     def forward(self, input_states):
         input_states = input_states.to(dtype=torch.long)
         input_states = input_states + 1
-        #print(input_states[0,0,:], torch.min(input_states), torch.max(input_states))
         x_hidden = self.x_embedding(input_states[:,:,0])
         y_hidden = self.y_embedding(input_states[:,:,1])
-        #print(x_hidden.size(), y_hidden.size())
         axis_hidden = torch.cat([x_hidden, y_hidden], dim=2)
 
         type_hidden = self.type_embedding(input_states[:,:,2])
@@ -64,10 +62,8 @@ class SketchSinPositionEmbedding(nn.Module):
         self.pos_embedding_matrix = torch.zeros(max_length, pos_hidden_dim)
         pos_vector = torch.arange(max_length).view(max_length, 1).type(torch.float)
         dim_vector = torch.arange(pos_hidden_dim).type(torch.float) + 1.0
-        #print((pos_vector / (dim_vector[::2] / 2).view(1, -1)).size(), self.pos_embedding_matrix[:,::2].size())
         self.pos_embedding_matrix[:,::2] = torch.sin(pos_vector / (dim_vector[::2] / 2).view(1, -1))
         self.pos_embedding_matrix[:,1::2] = torch.cos(pos_vector / ((dim_vector[1::2] - 1) / 2).view(1, -1))
-        #print(self.pos_embedding_matrix)
     '''
     Input:
         position_labels[batch, seq_len]
@@ -81,7 +77,6 @@ class SketchSinPositionEmbedding(nn.Module):
 class SketchLearnPositionEmbedding(nn.Module):
     def __init__(self, max_length, pos_hidden_dim):
         super(SketchLearnPositionEmbedding, self).__init__()
-        print(max_length, pos_hidden_dim)
         self.pos_embedding = nn.Embedding(max_length, pos_hidden_dim)
 
     '''
@@ -181,7 +176,6 @@ class SketchSelfAttention(nn.Module):
         # Calculate Attention maps
         attention_scores = torch.matmul(multi_query, multi_key.transpose(-1, -2))
         attention_scores = attention_scores / self.scale_factor
-        #print(attention_scores.size(), attention_mask.size())
         attention_scores = attention_scores + attention_mask
         attention_probs = F.softmax(attention_scores, dim=-1)
         attention_probs = self.dropout(attention_probs)
@@ -212,9 +206,7 @@ class SketchMultiHeadAttention(nn.Module):
 
     def forward(self, hidden_states, attention_mask, head_mask=None, output_attentions=False):
         input_states = hidden_states
-        #print(hidden_states)
         hidden_states = self.attention(hidden_states, attention_mask, head_mask=head_mask)
-        #print(hidden_states)
         if output_attentions:
             hidden_states, attention_probs = hidden_states
 
@@ -261,7 +253,6 @@ class SketchOutput(nn.Module):
     def forward(self, hidden_states, input_states):
         hidden_states = self.fc(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        #print(hidden_states.size())
         hidden_states = self.norm(hidden_states+input_states)
         return hidden_states
 

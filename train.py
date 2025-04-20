@@ -17,7 +17,7 @@ from colorama import Fore, Back, init
 def parse_args():
     parser = argparse.ArgumentParser('training')
 
-    parser.add_argument('--bs', type=int, default=10, help='batch size in training')
+    parser.add_argument('--bs', type=int, default=100, help='batch size in training')
     parser.add_argument('--epoch', default=2000, type=int, help='number of epoch in training')
     parser.add_argument('--is_load_weight', type=str, default='True', choices=['True', 'False'], help='is load pretrained weight')
     parser.add_argument('--n_skh_pnt', type=int, default=256, help='is load pretrained weight')

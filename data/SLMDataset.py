@@ -184,8 +184,10 @@ def get_allfiles(dir_path, suffix='txt', filename_only=False):
     return filepath_all
 
 
-class UlipDataset(Dataset):
+class SLMataset(Dataset):
     """
+    Sketch Large Model Dataset
+
     定位文件的路径如下：
     root
     ├─ train
@@ -278,6 +280,57 @@ class UlipDataset(Dataset):
 
         print('number of instance all:', len(self.datapath))
 
+    @staticmethod
+    def sketch_std(sketch):
+        """
+        草图质心移动到原点，大小缩放到 [-1, 1]^2
+        Args:
+            sketch: [n_pnts, 4]
+
+        Returns:
+
+        """
+        coordinates = sketch[:, :2]
+
+        mean_coor = np.mean(coordinates, axis=0)
+        coordinates = coordinates - mean_coor  # 实测是否加expand_dims效果一样
+        dist = np.max(np.sqrt(np.sum(coordinates ** 2, axis=1)), 0)
+        coordinates = coordinates / dist
+
+        sketch[:, :2] = coordinates
+        return sketch
+
+    def get_sketch_and_mask(self, sketch_root):
+        data_raw = np.loadtxt(sketch_root, delimiter=',')
+        data_raw = data_raw[:, :3]
+
+        # 多于指定点数则进行采样
+        n_point_raw = len(data_raw)
+        if n_point_raw > self.n_skh_points:
+            choice = np.random.choice(n_point_raw, self.n_skh_points, replace=True)
+            data_raw = data_raw[choice, :]
+
+        data_raw = self.sketch_std(data_raw)
+
+        # 将16， 17 改为 0， 1
+        c_sketch_len = len(data_raw)
+        data_raw[data_raw == 16] = 0
+        data_raw[data_raw == 17] = 1
+        data_raw = torch.from_numpy(data_raw)
+
+        data_cube = torch.zeros(self.n_skh_points, 5, dtype=torch.float)
+        mask = torch.zeros(self.n_skh_points, dtype=torch.float)
+
+        data_cube[:c_sketch_len, :2] = data_raw[:, :2]
+        data_cube[:c_sketch_len, 2] = data_raw[:, 2]
+        data_cube[:c_sketch_len, 3] = 1 - data_raw[:, 2]
+        data_cube[-1, 4] = 1
+
+        mask[:c_sketch_len] = 1
+
+        return data_cube, mask
+
+
     def __getitem__(self, index):
         """
         :return: [stroke1, stroke2, ..., stroke_n] (list)
@@ -300,10 +353,11 @@ class UlipDataset(Dataset):
 
         # sketch embedding
         c_skh_path = fn[2]
-        skh_data = np.loadtxt(c_skh_path, delimiter=',')[:, :2]
-        # 保证点数相同
-        choice = np.random.choice(skh_data.shape[0], self.n_skh_points, replace=True)
-        skh_data = skh_data[choice, :]
+        sketch, mask = self.get_sketch_and_mask(c_skh_path)
+        # skh_data = np.loadtxt(c_skh_path, delimiter=',')[:, :2]
+        # # 保证点数相同
+        # choice = np.random.choice(skh_data.shape[0], self.n_skh_points, replace=True)
+        # skh_data = skh_data[choice, :]
 
         # image embedding
         c_img_path = fn[3]
@@ -314,7 +368,7 @@ class UlipDataset(Dataset):
         ])
         tensor_image = transform(image)
 
-        return text_data, pcd_data, skh_data, tensor_image
+        return text_data, pcd_data, sketch, mask, tensor_image
 
     def __len__(self):
         return len(self.datapath)

@@ -61,7 +61,9 @@ def test():
 if __name__ == '__main__':
     # test()
 
-    save_weights_from_all()
+    # save_weights_from_all()
+    test()
+
 
     pass
 

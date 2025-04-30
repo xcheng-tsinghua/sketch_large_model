@@ -136,3 +136,36 @@ class MSELoss(nn.Module):
 
         return {'loss': loss}
 
+
+def constructive_loss(x, y, margin=1.0, lambda_=1.0):
+    """
+    对比损失
+    :param x: [bs ,emb]
+    :param y: [bs ,emb]
+    :param margin:
+    :param lambda_:
+    :return:
+    """
+    # x, y: tensors of shape (N, D)
+    N = x.size(0)
+
+    # 计算对应行之间的距离
+    pos_dist = F.pairwise_distance(x, y, p=2)
+    pos_loss = torch.mean(pos_dist ** 2)
+
+    # 计算 x 与 y 中所有不同行之间的距离
+    x_exp = x.unsqueeze(1)  # (N, 1, D)
+    y_exp = y.unsqueeze(0)  # (1, N, D)
+    dist_matrix = torch.norm(x_exp - y_exp, dim=2, p=2)  # (N, N)
+
+    # 创建掩码，排除对角线（即对应行）
+    mask = ~torch.eye(N, dtype=torch.bool, device=x.device)
+    neg_dist = dist_matrix[mask]
+
+    # 计算不同行之间的损失
+    neg_loss = torch.mean(F.relu(margin - neg_dist) ** 2)
+
+    # 总损失
+    loss = pos_loss + lambda_ * neg_loss
+    return loss
+

@@ -9,7 +9,7 @@ from encoders.PointBERT_ULIP2 import create_pretrained_pointbert
 from encoders.sketch_encoder import SketchBERT
 from data.SLMDataset import SLMataset
 # from encoders.loss_func import ULIPWithImageLoss as SketchLoss
-from encoders.loss_func import MSELoss as SketchLoss
+from encoders import loss_func as el
 import torch.amp as amp
 from colorama import Fore, Back, init
 
@@ -65,7 +65,7 @@ def main(args):
     )
 
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.7)
-    criterion = SketchLoss()
+    criterion = el.constructive_loss
     # scaler = amp.GradScaler(enabled=not args.disable_amp)
 
     for epoch in range(args.epoch):
@@ -92,8 +92,9 @@ def main(args):
             image_embed = pre_img_enc(tensor_image).detach().clone()
             sketch_embed = sketch_enc(skh_data, mask_data)  # 需要训练
 
-            loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, 1 / 0.07)
-            loss = loss_dict['loss']
+            # loss_dict = criterion(pcd_embed, text_embed, image_embed, sketch_embed, 1 / 0.07)
+            # loss = loss_dict['loss']
+            loss = criterion(sketch_embed, text_embed) + criterion(sketch_embed, pcd_embed) + criterion(sketch_embed, image_embed)
 
             loss.backward()
             optimizer.step()

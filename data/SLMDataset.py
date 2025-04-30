@@ -330,7 +330,6 @@ class SLMataset(Dataset):
 
         return data_cube, mask
 
-
     def __getitem__(self, index):
         """
         :return: [stroke1, stroke2, ..., stroke_n] (list)

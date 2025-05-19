@@ -39,10 +39,10 @@ def main(args):
         data_root = args.root_sever
 
     train_dataset = SLMataset(root=data_root, is_train=True, n_skh_points=args.n_skh_pnt, n_pcd_points=args.n_pcd_pnt)
-    # train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.bs, shuffle=True, num_workers=4)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.bs, shuffle=True, num_workers=4)
 
-    sampler = torch.utils.data.RandomSampler(train_dataset, num_samples=64, replacement=False)
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.bs, num_workers=4, sampler=sampler)
+    # sampler = torch.utils.data.RandomSampler(train_dataset, num_samples=64, replacement=False)
+    # train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.bs, num_workers=4, sampler=sampler)
 
     # 加载模型
     pre_img_enc = create_pretrained_imageencoder().cuda()
